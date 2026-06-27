@@ -1,0 +1,23 @@
+# wire this adapter into alembic as an external backend, e.g.:
+#
+#   cargo build --release
+#   alembic plan  --backend external --backend-config examples/backend.yaml \
+#     -f inventory.yaml -o plan.json
+#   alembic apply --backend external --backend-config examples/backend.yaml \
+#     -p plan.json
+#
+backend: external
+
+# path to the built adapter binary.
+command: ./target/release/alembic-adapter-example
+
+# optional process controls (defaults shown commented out):
+# args: ["--verbose"]
+# working_dir: .
+# env:
+#   MY_BACKEND_TOKEN: $TOKEN
+# timeout_seconds: 120
+
+# the `setup:` block is handed verbatim to ExternalAdapter::setup.
+setup:
+  host: http://localhost:8080
