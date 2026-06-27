@@ -12,7 +12,7 @@
 //!   4. if your backend needs schema provisioned first, implement `ensure_schema`.
 //!
 //! protocol reference:
-//! https://github.com/cyberwitchery/alembic/blob/main/docs/external-adapters.md
+//! <https://github.com/cyberwitchery/alembic/blob/main/docs/external-adapters.md>
 
 use alembic_core::{Schema, TypeName};
 use alembic_engine::{
