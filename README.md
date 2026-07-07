@@ -16,13 +16,15 @@ this template uses the rust sdk in `alembic-engine`, which removes the
 request/response boilerplate. you implement the `ExternalAdapter` trait; the
 `alembic_external_main!` macro generates `main()` and runs the protocol.
 
-the protocol has three methods:
+the protocol has four methods:
 
 - `read` — observe backend state for a set of types, so the engine can diff it
   against the desired inventory and build a plan.
 - `write` — apply a plan's create/update/delete operations.
 - `ensure_schema` — optionally provision backend schema (custom fields, types)
   before apply. defaults to a no-op.
+- `preview_schema` — optionally report what `ensure_schema` would provision, so
+  plan can show it without writing. defaults to "no preview available".
 
 see [`docs/external-adapters.md`](https://github.com/cyberwitchery/alembic/blob/main/docs/external-adapters.md)
 for the full request/response shapes.
