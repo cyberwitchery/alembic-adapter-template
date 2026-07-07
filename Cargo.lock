@@ -24,9 +24,9 @@ dependencies = [
 
 [[package]]
 name = "alembic-core"
-version = "0.5.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3cf98051afa529734d65de7409d387e7e30309f99d62884a41f755a3dae02467"
+checksum = "3a9db8e06dce8970f6c2af7cf663a42a47ffe9216b8853cb210f0ec734b9aca5"
 dependencies = [
  "ipnet",
  "regex",
@@ -38,9 +38,9 @@ dependencies = [
 
 [[package]]
 name = "alembic-engine"
-version = "0.5.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "576bdc5a6872ee800586df09451073009c504122ac2ec5b4fc7b1a9ebbf5d9f7"
+checksum = "4dfafddb3cff952d89b58603981155d392f24ec93b6a19a5bd16c2be672d810b"
 dependencies = [
  "alembic-core",
  "anyhow",

@@ -9,7 +9,8 @@
 //!   1. rename the crate (Cargo.toml `name`) and the `ExampleAdapter` type.
 //!   2. put your backend's connection/config on the struct and parse it in `setup`.
 //!   3. implement `read` (observe backend state) and `write` (apply ops).
-//!   4. if your backend needs schema provisioned first, implement `ensure_schema`.
+//!   4. if your backend needs schema provisioned first, implement `ensure_schema`
+//!      (and `preview_schema`, so `alembic plan` can show the schema work).
 //!
 //! protocol reference:
 //! <https://github.com/cyberwitchery/alembic/blob/main/docs/external-adapters.md>
@@ -138,6 +139,18 @@ impl ExternalAdapter for ExampleAdapter {
     //
     // fn ensure_schema(&mut self, _schema: &Schema) -> Result<alembic_engine::ProvisionReport> {
     //     Ok(alembic_engine::ProvisionReport::default())
+    // }
+
+    // optional: preview what `ensure_schema` would provision, writing nothing,
+    // so `alembic plan` can show the schema work up front. the trait's default
+    // returns `None` ("this adapter cannot preview"); if you implement
+    // `ensure_schema`, implement this too and return `Some(report)`.
+    //
+    // fn preview_schema(
+    //     &mut self,
+    //     _schema: &Schema,
+    // ) -> Result<Option<alembic_engine::ProvisionReport>> {
+    //     Ok(None)
     // }
 }
 
