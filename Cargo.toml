@@ -9,8 +9,8 @@ repository = "https://github.com/cyberwitchery/alembic-adapter-template"
 homepage = "https://github.com/cyberwitchery/alembic-adapter-template"
 
 [dependencies]
-alembic-core = "0.7.0"
-alembic-engine = "0.7.0"
+alembic-core = "0.8.0"
+alembic-engine = "0.8.0"
 anyhow = "1"
 serde_yaml = { package = "serde_yaml_ng", version = "0.10" }
 

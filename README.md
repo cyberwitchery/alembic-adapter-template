@@ -1,8 +1,8 @@
 # alembic external adapter template
 
 a starting point for building an [alembic](https://github.com/cyberwitchery/alembic)
-external adapter in rust. copy this repo, rename the crate, and fill in the three
-trait methods.
+external adapter in rust. copy this repo, rename the crate, and implement
+`setup`, `read`, and `write`.
 
 ## what an external adapter is
 
@@ -16,7 +16,7 @@ this template uses the rust sdk in `alembic-engine`, which removes the
 request/response boilerplate. you implement the `ExternalAdapter` trait; the
 `alembic_external_main!` macro generates `main()` and runs the protocol.
 
-the protocol has four methods:
+the protocol has five methods:
 
 - `read` — observe backend state for a set of types, so the engine can diff it
   against the desired inventory and build a plan.
@@ -25,6 +25,10 @@ the protocol has four methods:
   before apply. defaults to a no-op.
 - `preview_schema` — optionally report what `ensure_schema` would provision, so
   plan can show it without writing. defaults to "no preview available".
+- `capabilities` — report whether the adapter is read+write (`adapter`, the
+  default), write-only (`emitter`), or read-only (`observer`), so the host can
+  reject `import`/`apply` up front instead of calling into a side that does
+  nothing.
 
 see [`docs/external-adapters.md`](https://github.com/cyberwitchery/alembic/blob/main/docs/external-adapters.md)
 for the full request/response shapes.
@@ -38,9 +42,9 @@ for the full request/response shapes.
 4. implement `read` and `write`. if your backend needs schema set up first,
    uncomment and implement `ensure_schema`.
 
-emit-only adapters (the ones that just render an artifact file, like the ops
-ansible/dns/ssh adapters) return an empty vec from `read`, so every desired
-object becomes a create; `write` then renders the file.
+an emit-only adapter (one that renders an artifact file instead of talking to
+a live backend) returns an empty vec from `read`, so every desired object
+becomes a create; `write` then renders the file.
 
 ## build, test, run
 

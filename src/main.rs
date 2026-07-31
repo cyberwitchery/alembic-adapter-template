@@ -144,13 +144,27 @@ impl ExternalAdapter for ExampleAdapter {
     // optional: preview what `ensure_schema` would provision, writing nothing,
     // so `alembic plan` can show the schema work up front. the trait's default
     // returns `None` ("this adapter cannot preview"); if you implement
-    // `ensure_schema`, implement this too and return `Some(report)`.
+    // `ensure_schema`, implement this too and return `Some(report)`. the two
+    // `deleted_*` report lists feed the host's destructive-provisioning gate,
+    // so list any schema you would drop.
     //
     // fn preview_schema(
     //     &mut self,
     //     _schema: &Schema,
     // ) -> Result<Option<alembic_engine::ProvisionReport>> {
     //     Ok(None)
+    // }
+
+    // optional: report which side of the contract this adapter implements. the
+    // trait's default reports the full read+write `adapter` role. an emit-only
+    // adapter (empty `read`) overrides this to `emitter` so the host plans
+    // every object as a create and rejects `import` up front; a read-only one
+    // reports `observer` so `apply` is rejected.
+    //
+    // fn capabilities(&mut self) -> alembic_engine::ExternalCapabilities {
+    //     alembic_engine::ExternalCapabilities {
+    //         role: alembic_engine::ExternalRole::Emitter,
+    //     }
     // }
 }
 
