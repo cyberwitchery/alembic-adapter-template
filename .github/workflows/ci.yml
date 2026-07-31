@@ -57,3 +57,31 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo doc --no-deps
+
+  # protocol conformance: the runner that ships alongside alembic checks the
+  # built adapter against the external-adapter contract.
+  conformance:
+    name: conformance
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: cache the conformance runner
+        id: cache
+        uses: actions/cache@v6
+        with:
+          path: bin/alembic-adapter-test
+          key: alembic-adapter-test-${{ runner.os }}-0.8.0
+      - name: build alembic-adapter-test
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          cargo install alembic-adapter-test --version "=0.8.0" --debug --locked \
+            --root "${RUNNER_TEMP}/cargo"
+          mkdir -p bin
+          cp "${RUNNER_TEMP}/cargo/bin/alembic-adapter-test" bin/alembic-adapter-test
+          strip bin/alembic-adapter-test
+      - name: build the adapter
+        run: cargo build --release
+      - name: run conformance
+        run: ./bin/alembic-adapter-test -- ./target/release/alembic-adapter-example
