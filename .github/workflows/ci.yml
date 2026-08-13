@@ -15,6 +15,13 @@ permissions:
 
 env:
   CARGO_TERM_COLOR: always
+  # the alembic release this adapter is checked against. every release attaches
+  # static binaries, so the host checks below need no second toolchain or build.
+  # bump this deliberately: a red run then means a real protocol break, not
+  # upstream noise.
+  ALEMBIC_VERSION: v0.8.0
+  # ubuntu-latest runners are x86_64.
+  ALEMBIC_TARGET: x86_64-unknown-linux-gnu
 
 jobs:
   fmt:
@@ -67,21 +74,37 @@ jobs:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-      - name: cache the conformance runner
-        id: cache
-        uses: actions/cache@v6
-        with:
-          path: bin/alembic-adapter-test
-          key: alembic-adapter-test-${{ runner.os }}-0.8.0
-      - name: build alembic-adapter-test
-        if: steps.cache.outputs.cache-hit != 'true'
+      - name: fetch alembic-adapter-test
         run: |
-          cargo install alembic-adapter-test --version "=0.8.0" --debug --locked \
-            --root "${RUNNER_TEMP}/cargo"
+          name="alembic-adapter-test-${ALEMBIC_VERSION}-${ALEMBIC_TARGET}"
+          curl -sSfL -o runner.tar.gz \
+            "https://github.com/cyberwitchery/alembic/releases/download/${ALEMBIC_VERSION}/${name}.tar.gz"
+          tar xzf runner.tar.gz
           mkdir -p bin
-          cp "${RUNNER_TEMP}/cargo/bin/alembic-adapter-test" bin/alembic-adapter-test
-          strip bin/alembic-adapter-test
+          mv "${name}/alembic-adapter-test" bin/
       - name: build the adapter
         run: cargo build --release
       - name: run conformance
         run: ./bin/alembic-adapter-test -- ./target/release/alembic-adapter-example
+
+  # the real host against this template: the alembic cli spawns the built
+  # adapter through examples/backend.yaml and takes an inventory through plan
+  # and apply, so a host-side change fails ci instead of a user's first run.
+  e2e:
+    name: e2e (alembic)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: fetch the alembic cli
+        run: |
+          name="alembic-${ALEMBIC_VERSION}-${ALEMBIC_TARGET}"
+          curl -sSfL -o alembic.tar.gz \
+            "https://github.com/cyberwitchery/alembic/releases/download/${ALEMBIC_VERSION}/${name}.tar.gz"
+          tar xzf alembic.tar.gz
+          mkdir -p "$HOME/.local/bin"
+          mv "${name}/alembic" "$HOME/.local/bin/alembic"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: run the alembic-driven e2e
+        run: bash tests/e2e-alembic.sh

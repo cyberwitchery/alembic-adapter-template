@@ -55,7 +55,20 @@ cargo test --all-features
 cargo build --release
 ```
 
-the repo also comes with a ci definition for github.
+the repo also comes with a ci definition for github. besides the usual rust jobs
+it runs two checks against a real alembic release (pinned in
+`.github/workflows/ci.yml`, static binaries, no second toolchain to build):
+
+```bash
+# protocol conformance, with the runner that ships alongside alembic
+alembic-adapter-test -- ./target/release/alembic-adapter-example
+
+# the alembic cli itself spawning the adapter through examples/backend.yaml
+bash tests/e2e-alembic.sh
+```
+
+both need binaries from an [alembic release](https://github.com/cyberwitchery/alembic/releases)
+on your `PATH`; the e2e skips itself when `alembic` is missing.
 
 the built binary is your adapter. wire it into alembic as an external backend
 using a config like [`examples/backend.yaml`](examples/backend.yaml):
