@@ -15,10 +15,10 @@
 //! protocol reference:
 //! <https://github.com/cyberwitchery/alembic/blob/main/docs/external-adapters.md>
 
-use alembic_core::{Schema, TypeName};
-use alembic_engine::{
+use alembic_adapter_sdk::{
     alembic_external_main, AppliedOp, ApplyReport, ExternalAdapter, ExternalObject, Op, StateData,
 };
+use alembic_core::{Schema, TypeName};
 use anyhow::Result;
 
 // generates `fn main()`, which runs the stdin/stdout protocol against our adapter.
@@ -48,6 +48,9 @@ impl ExampleAdapter {
 }
 
 impl ExternalAdapter for ExampleAdapter {
+    /// only the error's `Display` reaches the host, so any error type works.
+    type Error = anyhow::Error;
+
     /// called once per request with the `setup:` block from the backend config.
     /// parse your connection details and options here.
     fn setup(&mut self, configuration: &serde_yaml::Value) -> Result<()> {
@@ -137,22 +140,23 @@ impl ExternalAdapter for ExampleAdapter {
     // the trait's default returns an empty report; uncomment and implement if
     // your backend needs schema set up before objects can be written.
     //
-    // fn ensure_schema(&mut self, _schema: &Schema) -> Result<alembic_engine::ProvisionReport> {
-    //     Ok(alembic_engine::ProvisionReport::default())
+    // fn ensure_schema(&mut self, _schema: &Schema) -> Result<alembic_adapter_sdk::ProvisionReport> {
+    //     Ok(alembic_adapter_sdk::ProvisionReport::default())
     // }
 
     // optional: preview what `ensure_schema` would provision, writing nothing,
     // so `alembic plan` can show the schema work up front. the trait's default
-    // returns `None` ("this adapter cannot preview"); if you implement
-    // `ensure_schema`, implement this too and return `Some(report)`. the two
-    // `deleted_*` report lists feed the host's destructive-provisioning gate,
-    // so list any schema you would drop.
+    // returns an empty report, matching the default `ensure_schema`; if you
+    // implement `ensure_schema`, implement this too. returning `None` means
+    // "this adapter cannot preview", and the host then refuses to provision.
+    // the two `deleted_*` report lists feed the host's destructive-provisioning
+    // gate, so list any schema you would drop.
     //
     // fn preview_schema(
     //     &mut self,
     //     _schema: &Schema,
-    // ) -> Result<Option<alembic_engine::ProvisionReport>> {
-    //     Ok(None)
+    // ) -> Result<Option<alembic_adapter_sdk::ProvisionReport>> {
+    //     Ok(Some(alembic_adapter_sdk::ProvisionReport::default()))
     // }
 
     // optional: report which side of the contract this adapter implements. the
@@ -161,9 +165,9 @@ impl ExternalAdapter for ExampleAdapter {
     // every object as a create and rejects `import` up front; a read-only one
     // reports `observer` so `apply` is rejected.
     //
-    // fn capabilities(&mut self) -> alembic_engine::ExternalCapabilities {
-    //     alembic_engine::ExternalCapabilities {
-    //         role: alembic_engine::ExternalRole::Emitter,
+    // fn capabilities(&mut self) -> alembic_adapter_sdk::ExternalCapabilities {
+    //     alembic_adapter_sdk::ExternalCapabilities {
+    //         role: alembic_adapter_sdk::ExternalRole::Emitter,
     //     }
     // }
 }

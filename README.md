@@ -12,7 +12,7 @@ on stdin and writes a single json response on stdout. that boundary means an
 adapter never links into the main binary and can target any backend, as long as it
 speaks the protocol.
 
-this template uses the rust sdk in `alembic-engine`, which removes the
+this template uses the rust sdk, `alembic-adapter-sdk`, which removes the
 request/response boilerplate. you implement the `ExternalAdapter` trait; the
 `alembic_external_main!` macro generates `main()` and runs the protocol.
 
