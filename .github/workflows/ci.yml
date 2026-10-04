@@ -118,3 +118,16 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: run the alembic-driven e2e
         run: bash tests/e2e-alembic.sh
+
+  unsafe-budget:
+    name: unsafe-budget
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # v1
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+      - uses: cyberwitchery/unsafe-budget@22209a08757e0b3f994befcff704e1ef76d65d0f # v0.5.4
+        with:
+          mode: check
