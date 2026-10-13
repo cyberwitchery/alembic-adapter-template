@@ -53,7 +53,7 @@ impl ExternalAdapter for ExampleAdapter {
 
     /// called once per request with the `setup:` block from the backend config.
     /// parse your connection details and options here.
-    fn setup(&mut self, configuration: &serde_yaml::Value) -> Result<()> {
+    fn setup(&mut self, configuration: &serde_json::Value) -> Result<()> {
         if let Some(host) = config_str(configuration, "host") {
             self.host = host.to_string();
         }
@@ -173,8 +173,8 @@ impl ExternalAdapter for ExampleAdapter {
 }
 
 /// read an optional string field from a `setup:` config value.
-fn config_str<'a>(cfg: &'a serde_yaml::Value, key: &str) -> Option<&'a str> {
-    cfg.get(key).and_then(serde_yaml::Value::as_str)
+fn config_str<'a>(cfg: &'a serde_json::Value, key: &str) -> Option<&'a str> {
+    cfg.get(key).and_then(serde_json::Value::as_str)
 }
 
 #[cfg(test)]
@@ -185,8 +185,7 @@ mod tests {
     #[test]
     fn setup_reads_host() {
         let mut adapter = ExampleAdapter::default();
-        let cfg: serde_yaml::Value =
-            serde_yaml::from_str("host: https://backend.example.com").unwrap();
+        let cfg = serde_json::json!({"host": "https://backend.example.com"});
         adapter.setup(&cfg).unwrap();
         assert_eq!(adapter.host, "https://backend.example.com");
     }
@@ -194,7 +193,7 @@ mod tests {
     #[test]
     fn setup_keeps_default_when_unset() {
         let mut adapter = ExampleAdapter::default();
-        adapter.setup(&serde_yaml::Value::default()).unwrap();
+        adapter.setup(&serde_json::Value::Null).unwrap();
         assert_eq!(adapter.host, "http://localhost:8080");
     }
 
