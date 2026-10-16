@@ -217,9 +217,11 @@ mod tests {
             "attrs": { "name": "leaf01", "primary_ip": "198.51.100.1", "site": "site-a" }
         }))
         .unwrap();
+        let uid = device.uid;
+        let type_name = device.type_name.clone();
         let ops = vec![Op::Create {
-            uid: device.uid,
-            type_name: device.type_name.clone(),
+            uid,
+            type_name: type_name.clone(),
             desired: device,
         }];
 
@@ -227,6 +229,13 @@ mod tests {
             .write(&Schema::default(), &ops, &StateData::default())
             .unwrap();
 
+        // one applied op per input op, carrying the op's uid and type.
         assert_eq!(report.applied.len(), 1);
+        let applied = &report.applied[0];
+        assert_eq!(applied.uid, uid);
+        assert_eq!(applied.type_name, type_name);
+        // the skeleton keeps nothing, so it has no backend id to map. a real
+        // adapter asserts the id its backend assigned here.
+        assert_eq!(applied.backend_id, None);
     }
 }
