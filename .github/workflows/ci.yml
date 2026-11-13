@@ -128,6 +128,6 @@ jobs:
         with:
           toolchain: stable
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
-      - uses: cyberwitchery/unsafe-budget@22209a08757e0b3f994befcff704e1ef76d65d0f # v0.5.4
+      - uses: cyberwitchery/unsafe-budget@1b02eea5f921a703c510f790236c07b26e4aee8a # v0.5.5
         with:
           mode: check
