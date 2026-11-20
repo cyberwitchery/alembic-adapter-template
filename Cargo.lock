@@ -23,9 +23,9 @@ dependencies = [
 
 [[package]]
 name = "alembic-adapter-sdk"
-version = "0.11.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16b005a86183eedca347b70fd1f64f423b39c22c27898239e179bea03b26f9ec"
+checksum = "1942166157dc5c31fe51eec1f34534dc16705512dae2882b73230e86e97b814e"
 dependencies = [
  "alembic-core",
  "async-trait",
@@ -40,9 +40,9 @@ dependencies = [
 
 [[package]]
 name = "alembic-core"
-version = "0.11.0"
+version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26a17c113ff23925ba33b2291e35755f2a58c6682bf06049eb580ae3aa4a3417"
+checksum = "317b0c3ee6c5d84a9bc485e9e9eefea9ef023282185a2046616404669bff5bb1"
 dependencies = [
  "ipnet",
  "regex",
@@ -204,9 +204,9 @@ dependencies = [
 
 [[package]]
 name = "granit-parser"
-version = "1.3.0"
+version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e20f99e46474f56bd905c56e817ebddcf377a611f94c53ac4649e4d3fa3c0cd0"
+checksum = "9bd04d0d9c7079b416b458d2317aea4aa964c81938cb7c20f559758c4f422dc8"
 dependencies = [
  "arraydeque",
  "smallvec",
@@ -376,9 +376,9 @@ dependencies = [
 
 [[package]]
 name = "serde-saphyr"
-version = "1.3.0"
+version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8050abb251097357e24aff63ba2c52a6309ecb7d23a5474023df960a02694d8"
+checksum = "969cde0349344dbbf58b5f9badbfb8f806db13969364eb8007c057ef687007d9"
 dependencies = [
  "annotate-snippets",
  "base64",

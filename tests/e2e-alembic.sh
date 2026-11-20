@@ -5,10 +5,14 @@
 # it proves the template as shipped is drivable by the pinned release: the
 # backend config wires up, the process is spawned, and setup, capabilities,
 # preview_schema, read, ensure_schema and write all answer well enough for the
-# host to write a plan and apply it. it does not check convergence, because the
-# adapter here is a skeleton whose `read` observes nothing and whose `write`
-# keeps nothing -- fill in the TODOs in src/main.rs and this becomes a real
-# converge test (see the sqlite/carp and python-sdk adapters for that shape).
+# host to write a plan and apply it. it then hands the adapter an update and a
+# delete, the delete with the `refs` alembic 0.13 records, in a plan derived from
+# the first. that apply runs with `--no-stale-check`: the skeleton's `read`
+# observes nothing, so alembic's check would refuse the update.
+#
+# it does not check convergence, because the adapter here is a skeleton whose
+# `write` keeps nothing -- fill in the TODOs in src/main.rs and this becomes a
+# real converge test (see the sqlite/carp and python-sdk adapters for that shape).
 #
 # needs the alembic cli. point $ALEMBIC at it, or have `alembic` on PATH.
 set -uo pipefail
@@ -79,6 +83,39 @@ expect "the adapter answered read, so plan has 2 creates" "$(ops_count p1.json)"
 "$ALEMBIC" apply -p p1.json "${B[@]}" > apply.txt 2>&1
 expect "the adapter answered write, so apply applied both ops" \
   "$(grep -c '^applied 2 operations$' apply.txt)" "1"
+
+# the first plan's create of the site becomes an update, and its create of the
+# device a delete that references the site.
+python3 - p1.json p2.json <<'PY'
+import json, sys
+plan = json.load(open(sys.argv[1]))
+by_type = {op["type_name"]: op for op in plan["ops"]}
+site, device = by_type["dcim.site"], by_type["dcim.device"]
+plan["ops"] = [
+    {
+        "op": "update",
+        "uid": site["uid"],
+        "type_name": "dcim.site",
+        "desired": site["desired"],
+        "changes": [{"field": "name", "from": "FRA", "to": site["desired"]["attrs"]["name"]}],
+        "backend_id": 1,
+    },
+    {
+        "op": "delete",
+        "uid": device["uid"],
+        "type_name": "dcim.device",
+        "key": device["desired"]["key"],
+        "backend_id": 2,
+        "refs": [site["uid"]],
+    },
+]
+plan["summary"] = {"create": 0, "update": 1, "delete": 1}
+json.dump(plan, open(sys.argv[2], "w"))
+PY
+"$ALEMBIC" apply -p p2.json --allow-delete --no-stale-check "${B[@]}" > apply2.txt 2>&1
+expect "the adapter answered an update and a delete with refs" \
+  "$(grep -c '^applied 2 operations$' apply2.txt)" "1"
+[ "$fail" -eq 0 ] || cat apply2.txt
 
 echo
 if [ "$fail" -eq 0 ]; then echo "e2e-alembic: all checks passed"; else echo "e2e-alembic: failures above"; fi
