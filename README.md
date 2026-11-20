@@ -24,7 +24,8 @@ the protocol has five methods:
 - `ensure_schema` — optionally provision backend schema (custom fields, types)
   before apply. defaults to a no-op.
 - `preview_schema` — optionally report what `ensure_schema` would provision, so
-  plan can show it without writing. defaults to "no preview available".
+  plan can show it without writing. defaults to an empty report, matching the
+  default `ensure_schema`.
 - `capabilities` — report whether the adapter is read+write (`adapter`, the
   default), write-only (`emitter`), or read-only (`observer`), so the host can
   reject `import`/`apply` up front instead of calling into a side that does
@@ -42,9 +43,11 @@ for the full request/response shapes.
 4. implement `read` and `write`. if your backend needs schema set up first,
    uncomment and implement `ensure_schema`.
 
-an emit-only adapter (one that renders an artifact file instead of talking to
-a live backend) returns an empty vec from `read`, so every desired object
-becomes a create; `write` then renders the file.
+a write-only adapter (one that renders an artifact file instead of talking to
+a live backend) declares the `emitter` role in `capabilities`. the host then
+plans every desired object as a create and never calls `read`, so `read` can
+return an error; `write` renders the file. don't return an empty vec from `read`
+in a read+write adapter: every object would plan as a create on every run.
 
 ## build, test, run
 

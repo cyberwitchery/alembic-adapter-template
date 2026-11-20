@@ -67,8 +67,10 @@ impl ExternalAdapter for ExampleAdapter {
     /// observed `attrs` (using ir field names), and `backend_id` when known.
     /// `state` carries the engine's existing uid -> backend_id mappings.
     ///
-    /// an emit-only adapter (one that just writes artifacts and keeps no backend
-    /// state) can return an empty vec, which makes every desired object a create.
+    /// a write-only adapter (one that just writes artifacts and keeps no backend
+    /// state) declares the `emitter` role in `capabilities` instead; the host
+    /// never calls its `read`. an empty vec here makes every desired object a
+    /// create on every run.
     fn read(
         &mut self,
         _schema: &Schema,
@@ -148,7 +150,8 @@ impl ExternalAdapter for ExampleAdapter {
     // so `alembic plan` can show the schema work up front. the trait's default
     // returns an empty report, matching the default `ensure_schema`; if you
     // implement `ensure_schema`, implement this too. returning `None` means
-    // "this adapter cannot preview", and the host then refuses to provision.
+    // "this adapter cannot preview", and the host then refuses every apply
+    // unless `--allow-delete` is passed.
     // the two `deleted_*` report lists feed the host's destructive-provisioning
     // gate, so list any schema you would drop.
     //
@@ -160,9 +163,9 @@ impl ExternalAdapter for ExampleAdapter {
     // }
 
     // optional: report which side of the contract this adapter implements. the
-    // trait's default reports the full read+write `adapter` role. an emit-only
-    // adapter (empty `read`) overrides this to `emitter` so the host plans
-    // every object as a create and rejects `import` up front; a read-only one
+    // trait's default reports the full read+write `adapter` role. a write-only
+    // adapter overrides this to `emitter` so the host plans every object as a
+    // create, never calls `read` and rejects `import` up front; a read-only one
     // reports `observer` so `apply` is rejected.
     //
     // fn capabilities(&mut self) -> alembic_adapter_sdk::ExternalCapabilities {
